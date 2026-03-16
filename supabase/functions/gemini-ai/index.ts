@@ -112,7 +112,7 @@ serve(async (req) => {
     const startTime = Date.now();
 
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`,
       {
         method: "POST",
         headers: {
@@ -170,7 +170,7 @@ serve(async (req) => {
         user_prompt: prompt || null,
         ai_response: content.slice(0, 10000),
         response_time_ms: responseTimeMs,
-        model_used: "gemini-2.5-flash",
+        model_used: "gemini-1.5-flash",
         tokens_used: tokensUsed,
       });
 

@@ -1049,6 +1049,44 @@ export const additionalComplianceTitles: ComplianceTitle[] = [
 ];
 
 // ============================================================================
+// DEPARTMENT-TO-COLLECTION ACCESS MAPPING
+// ============================================================================
+
+// Maps department IDs to the collection IDs they can access.
+// Admins and Compliance Officers bypass this mapping (see EnterpriseContext).
+export const departmentCollectionAccess: Record<string, string[]> = {
+  // Metro General Hospital departments
+  'dept-or':          ['coll-periop-safety', 'coll-patient-safety-risk'],
+  'dept-anesthesia':  ['coll-anesthesia-protocols', 'coll-emergency-critical'],
+  'dept-icu':         ['coll-emergency-critical', 'coll-infection-prevention'],
+  'dept-ed':          ['coll-emergency-critical', 'coll-patient-safety-risk'],
+  'dept-cardiology':  ['coll-patient-safety-risk', 'coll-emergency-critical'],
+  'dept-compliance':  ['coll-periop-safety', 'coll-anesthesia-protocols', 'coll-infection-prevention', 'coll-patient-safety-risk', 'coll-emergency-critical'],
+
+  // Bayview Surgical Center departments
+  'dept-bayview-or':         ['coll-periop-safety', 'coll-patient-safety-risk'],
+  'dept-bayview-anesthesia': ['coll-anesthesia-protocols', 'coll-emergency-critical'],
+  'dept-bayview-compliance': ['coll-periop-safety', 'coll-anesthesia-protocols', 'coll-infection-prevention', 'coll-patient-safety-risk', 'coll-emergency-critical'],
+
+  // Community Health Clinic departments
+  'dept-community-nursing':    ['coll-periop-safety', 'coll-patient-safety-risk'],
+  'dept-community-compliance': ['coll-periop-safety', 'coll-infection-prevention'],
+};
+
+/**
+ * Returns all collection IDs accessible to a set of department IDs.
+ * Returns an empty array if no departments match.
+ */
+export function getCollectionIdsForDepartments(departmentIds: string[]): string[] {
+  const ids = new Set<string>();
+  for (const deptId of departmentIds) {
+    const collIds = departmentCollectionAccess[deptId];
+    if (collIds) collIds.forEach(id => ids.add(id));
+  }
+  return [...ids];
+}
+
+// ============================================================================
 // TIER ENFORCEMENT LOGIC HELPERS
 // ============================================================================
 

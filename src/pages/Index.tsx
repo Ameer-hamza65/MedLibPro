@@ -13,6 +13,7 @@ import { Badge } from '@/components/ui/badge';
 import { EpubBook, Chapter, medicalTags } from '@/data/mockEpubData';
 import { useUser } from '@/context/UserContext';
 import { useBooks } from '@/context/BookContext';
+import { useUsageTracking } from '@/hooks/useUsageTracking';
 import { complianceCollections } from '@/data/complianceData';
 
 function searchBooksInLibrary(books: EpubBook[], query: string) {
@@ -71,6 +72,7 @@ export default function Index() {
   const navigate = useNavigate();
   const { hasFullAccess } = useUser();
   const { books, totalBooks } = useBooks();
+  const { trackUsageEvent } = useUsageTracking();
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<ReturnType<typeof searchBooksInLibrary>>([]);
   const [hasSearched, setHasSearched] = useState(false);
@@ -78,9 +80,17 @@ export default function Index() {
 
   const handleSearch = useCallback((query: string) => {
     setSearchQuery(query);
-    setSearchResults(searchBooksInLibrary(books, query));
+    const results = searchBooksInLibrary(books, query);
+    setSearchResults(results);
     setHasSearched(true);
-  }, [books]);
+
+    // Track search event for COUNTER reporting
+    trackUsageEvent({
+      eventType: 'search',
+      bookTitle: results.length > 0 ? results[0].book.title : undefined,
+      metadata: { query, result_count: results.length },
+    });
+  }, [books, trackUsageEvent]);
 
   const handleViewChapter = useCallback((book: EpubBook, chapter: Chapter) => {
     setReaderState({ book, chapter });

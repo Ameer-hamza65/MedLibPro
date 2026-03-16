@@ -30,7 +30,7 @@ const categoryColors: Record<ComplianceCollection['category'], string> = {
 export default function CollectionDetail() {
   const { collectionId } = useParams<{ collectionId: string }>();
   const navigate = useNavigate();
-  const { currentEnterprise, isEnterpriseMode, collections, getEnterpriseBookAccess, logAction, canAccessCollectionByTier, currentTier } = useEnterprise();
+  const { currentEnterprise, isEnterpriseMode, collections, getEnterpriseBookAccess, logAction, canAccessCollectionByTier, currentTier, hasDepartmentAccessToCollection, currentUser } = useEnterprise();
   const { books } = useBooks();
 
   if (!isEnterpriseMode || !currentEnterprise) {
@@ -96,6 +96,39 @@ export default function CollectionDetail() {
               <div className="flex gap-3">
                 <Button variant="outline" onClick={() => navigate('/collections')}>Back</Button>
                 <Button onClick={() => navigate('/subscribe')}>View Plans</Button>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+      </div>
+    );
+  }
+
+  // Department-level access check
+  const isDeptLocked = !hasDepartmentAccessToCollection(collection.id);
+
+  if (isDeptLocked) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center p-4">
+        <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}>
+          <Card className="max-w-md w-full glass-card">
+            <CardHeader className="text-center">
+              <div className="mx-auto mb-4 p-4 rounded-full bg-muted">
+                <Lock className="h-12 w-12 text-muted-foreground" />
+              </div>
+              <CardTitle>Department Access Required</CardTitle>
+              <CardDescription>
+                <span className="font-semibold">{collection.name}</span> is not assigned to your department.
+                Contact your administrator for access.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="flex flex-col items-center gap-3">
+              <Badge variant="secondary">
+                {currentUser?.role.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
+              </Badge>
+              <div className="flex gap-3">
+                <Button variant="outline" onClick={() => navigate('/collections')}>Back</Button>
+                <Button variant="outline" onClick={() => navigate('/enterprise')}>Dashboard</Button>
               </div>
             </CardContent>
           </Card>

@@ -167,3 +167,104 @@ User Login → Seat Check → Dashboard Load
 | Add-On builder for Pro/Enterprise | ✅ |
 | Upgrade CTAs throughout | ✅ |
 | Current Plan visibility on dashboard | ✅ |
+
+---
+
+## Client Demo Requirements
+
+Based on stakeholder feedback (post-POC review), the following items have been identified as critical for the upcoming Sarasota demo. This section maps each requirement to current implementation status.
+
+### 1. Repository Architecture (File Storage)
+**Status:** ✅ Implemented  
+- `book-files` storage bucket with RLS-protected access
+- EPUB/PDF upload pipeline via Admin Upload page
+- Files stored with structured paths (`book-files/{book_id}/filename`)
+- Storage integrated with book metadata in `books` table
+
+### 2. Security & Access Control
+**Status:** ✅ Implemented  
+- Row-Level Security (RLS) on all 15 database tables
+- Multi-tenant data isolation via `enterprise_id` foreign keys
+- Role-based access: `staff`, `department_manager`, `compliance_officer`, `admin`
+- Security-definer helper functions (`is_enterprise_admin`, `is_compliance_officer`, `is_platform_admin`, `has_book_access`, `get_user_enterprise_id`)
+- Institutional seat-based entitlements via `book_access` table
+- JWT authentication with session persistence
+
+### 3. Structured Metadata
+**Status:** ✅ Implemented  
+- `books` table stores: ISBN, publisher, edition, published year, specialty, tags, authors
+- Searchable catalog with metadata-driven filtering
+- Cover images and descriptions for all titles
+- Chapter-level metadata in `book_chapters` (tags, sort order, page numbers)
+
+### 4. Automation Workflows (Ingestion to Catalog)
+**Status:** ✅ Implemented  
+- Admin Upload page: drag-and-drop EPUB/PDF ingestion
+- Automatic chapter extraction and parsing via `parse-pdf` edge function
+- Metadata auto-population from uploaded files
+- Direct persistence to `books` and `book_chapters` tables
+- Catalog automatically reflects newly ingested titles
+
+### 5. COUNTER 5.1 Librarian Reporting
+**Status:** ✅ Implemented  
+- Dedicated COUNTER Reports page (`/counter-reporting`)
+- Usage event tracking via `usage_events` table
+- Report types: TR (Title Report), TR_J1, DR (Database Report), PR (Platform Report)
+- Date range filtering and CSV export
+- Institutional branding with compliance terminology
+
+### 6. AI-Powered Compliance Extraction
+**Status:** ✅ Implemented  
+- Chapter-scoped AI queries via Gemini integration
+- Compliance-focused prompt templates (summary, key points, Q&A)
+- Repository-only guardrails (no open-web queries)
+- All AI queries logged to `ai_query_logs` with response times and token usage
+- Real-time AI analytics on Enterprise Dashboard
+
+### 7. Tiered Licensing Enforcement
+**Status:** ✅ Implemented (Week 4)  
+- Three tiers: Basic (10 seats), Pro (25 seats), Enterprise (250+ seats)
+- Hard enforcement on seat limits, collection access, and AI query caps
+- Upgrade CTAs with clear tier differentiation
+- Add-On Title Builder for Pro/Enterprise institutions
+
+---
+
+## Demo Walkthrough Script (Recommended)
+
+For the Sarasota presentation, the following flow demonstrates the full platform value:
+
+1. **Landing Page** → Institutional value proposition, "Request Demo" CTA
+2. **Login as Enterprise Admin** (Metro General Hospital)
+3. **Title Catalog** → Show 50-title library with structured metadata (ISBN, publisher, year)
+4. **Compliance Collections** → Navigate 5 curated collections, show title groupings
+5. **Reader + AI Panel** → Open a title, demonstrate:
+   - Chapter summary extraction
+   - Key compliance point identification
+   - Free-form compliance Q&A
+   - Show AI query logging in real-time
+6. **Enterprise Dashboard** → Show:
+   - Seat utilization tracking
+   - AI usage analytics (query types, most-queried titles)
+   - Multi-location facility overview
+7. **COUNTER Reports** → Generate TR report with date filtering, export CSV
+8. **Admin Upload** → Demonstrate ingestion workflow (upload → parse → catalog)
+9. **Tier Comparison** → Switch to Basic tier account, show enforcement:
+   - Locked collections with upgrade CTAs
+   - AI query limits
+   - Feature gating on reports
+10. **Audit Logs** → Show comprehensive action tracking for compliance officers
+
+---
+
+## Next Sprint: Week 5 – Dashboard & Reporting
+
+| Deliverable | Priority |
+|-------------|----------|
+| Usage aggregation refinements | High |
+| AI reporting enhancements | High |
+| CSV export polish | Medium |
+| Performance optimization | Medium |
+| Pre-demo QA pass | High |
+| Upgrade CTAs throughout | ✅ |
+| Current Plan visibility on dashboard | ✅ |

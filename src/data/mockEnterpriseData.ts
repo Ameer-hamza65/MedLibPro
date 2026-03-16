@@ -123,6 +123,15 @@ export const mockDepartments: Department[] = [
   { id: 'dept-cardiology', enterpriseId: 'ent-metro-general', name: 'Cardiology', description: 'Cardiovascular medicine' },
   { id: 'dept-compliance', enterpriseId: 'ent-metro-general', name: 'Compliance & Risk', description: 'Risk management and regulatory compliance' },
   
+  // Bayview Surgical Center
+  { id: 'dept-bayview-or', enterpriseId: 'ent-bayview-surgical', name: 'Operating Room', description: 'Surgical services' },
+  { id: 'dept-bayview-anesthesia', enterpriseId: 'ent-bayview-surgical', name: 'Anesthesiology', description: 'Anesthesia services' },
+  { id: 'dept-bayview-compliance', enterpriseId: 'ent-bayview-surgical', name: 'Compliance & Quality', description: 'Quality assurance and compliance' },
+
+  // Community Health Clinic
+  { id: 'dept-community-nursing', enterpriseId: 'ent-community-clinic', name: 'Nursing', description: 'General nursing services' },
+  { id: 'dept-community-compliance', enterpriseId: 'ent-community-clinic', name: 'Compliance', description: 'Regulatory compliance' },
+
   // Stanford Medical School
   { id: 'dept-clinical-ed', enterpriseId: 'ent-stanford-med', name: 'Clinical Education', description: 'Medical student training' },
   { id: 'dept-residency', enterpriseId: 'ent-stanford-med', name: 'Residency Programs', description: 'Graduate medical education' },
@@ -197,11 +206,33 @@ export const mockEnterpriseUsers: EnterpriseUser[] = [
     email: 'dr.patel@bayviewsurgical.com',
     name: 'Dr. Amit Patel',
     enterpriseId: 'ent-bayview-surgical',
-    departmentIds: ['dept-bayview-or'],
+    departmentIds: ['dept-bayview-compliance'],
     role: 'admin',
     jobTitle: 'Medical Director',
     isActive: true,
     lastAccess: '2025-02-02T14:00:00Z'
+  },
+  {
+    id: 'user-bayview-manager',
+    email: 'karen.lee@bayviewsurgical.com',
+    name: 'Karen Lee, BSN',
+    enterpriseId: 'ent-bayview-surgical',
+    departmentIds: ['dept-bayview-or'],
+    role: 'department_manager',
+    jobTitle: 'OR Manager',
+    isActive: true,
+    lastAccess: '2025-02-02T11:00:00Z'
+  },
+  {
+    id: 'user-bayview-staff',
+    email: 'tom.nguyen@bayviewsurgical.com',
+    name: 'Tom Nguyen, CRNA',
+    enterpriseId: 'ent-bayview-surgical',
+    departmentIds: ['dept-bayview-anesthesia'],
+    role: 'staff',
+    jobTitle: 'Nurse Anesthetist',
+    isActive: true,
+    lastAccess: '2025-02-01T09:00:00Z'
   },
   // Community Health Clinic (Basic tier)
   {
@@ -209,11 +240,22 @@ export const mockEnterpriseUsers: EnterpriseUser[] = [
     email: 'maria.garcia@communityhealthclinic.org',
     name: 'Maria Garcia, RN',
     enterpriseId: 'ent-community-clinic',
-    departmentIds: ['dept-community-nursing'],
+    departmentIds: ['dept-community-compliance'],
     role: 'admin',
     jobTitle: 'Nursing Director',
     isActive: true,
     lastAccess: '2025-02-01T10:00:00Z'
+  },
+  {
+    id: 'user-community-staff',
+    email: 'david.chen@communityhealthclinic.org',
+    name: 'David Chen, RN',
+    enterpriseId: 'ent-community-clinic',
+    departmentIds: ['dept-community-nursing'],
+    role: 'staff',
+    jobTitle: 'Staff Nurse',
+    isActive: true,
+    lastAccess: '2025-01-30T08:00:00Z'
   }
 ];
 

@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useMemo } from 'react';
+import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -14,6 +14,7 @@ import { useReadingSession } from '@/hooks/useReadingSession';
 import { useAnnotations } from '@/hooks/useAnnotations';
 import { useUser } from '@/context/UserContext';
 import { useBooks } from '@/context/BookContext';
+import { useUsageTracking } from '@/hooks/useUsageTracking';
 import type { Chapter } from '@/data/mockEpubData';
 import { cn } from '@/lib/utils';
 
@@ -22,6 +23,8 @@ export default function Reader() {
   const [searchParams] = useSearchParams();
   const { user, hasFullAccess } = useUser();
   const { books } = useBooks();
+  const { trackUsageEvent } = useUsageTracking();
+  const hasTrackedRef = useRef(false);
 
   const bookId = searchParams.get('book') || '';
   const chapterId = searchParams.get('chapter') || '';
@@ -107,7 +110,18 @@ export default function Reader() {
     
     // Log successful load
     console.log(`[Reader] Successfully loaded book "${book.title}", chapter "${chapter.title}"`);
-  }, [book, chapter, bookId, hasFullAccess, navigate]);
+
+    // Track chapter view as usage event (once per mount)
+    if (!hasTrackedRef.current) {
+      hasTrackedRef.current = true;
+      trackUsageEvent({
+        eventType: 'chapter_view',
+        bookId: book.id,
+        bookTitle: book.title,
+        metadata: { chapter_id: chapter.id, chapter_title: chapter.title },
+      });
+    }
+  }, [book, chapter, bookId, hasFullAccess, navigate, trackUsageEvent]);
 
   const handleChunkClick = useCallback((index: number) => {
     setActiveChunkIndex(index);

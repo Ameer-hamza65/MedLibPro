@@ -21,6 +21,7 @@ import Auth from "./pages/Auth";
 import Accessibility from "./pages/Accessibility";
 import RepositoryOverview from "./pages/RepositoryOverview";
 import InstitutionalPricing from "./pages/InstitutionalPricing";
+
 import NotFound from "./pages/NotFound";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 
@@ -54,6 +55,7 @@ const App = () => (
                     <Route path="/counter-reports" element={<CounterReporting />} />
                     <Route path="/accessibility" element={<Accessibility />} />
                     <Route path="/subscribe" element={<InstitutionalPricing />} />
+                    
                     <Route path="*" element={<NotFound />} />
                   </Routes>
                 </main>

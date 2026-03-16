@@ -28,6 +28,7 @@ import {
   getAccessibleCollections,
   isWithinSeatLimit,
   getRemainingAIQueries,
+  getCollectionIdsForDepartments,
   mockFacilities,
   mockFacilityUsageStats,
 } from '@/data/complianceData';
@@ -73,6 +74,10 @@ interface EnterpriseContextType {
   getEnterpriseDepartments: (enterpriseId: string) => Department[];
   getEnterpriseBookAccess: (enterpriseId: string) => BookAccess[];
   getCollectionBooks: (collectionId: string) => string[];
+  
+  // Department-level filtering
+  getDepartmentAccessibleCollections: () => ComplianceCollection[];
+  hasDepartmentAccessToCollection: (collectionId: string) => boolean;
   
   // Audit logging
   logAction: (action: AuditLogEntry['action'], targetType?: AuditLogEntry['targetType'], targetId?: string, targetTitle?: string, metadata?: Record<string, unknown>) => void;
@@ -198,6 +203,25 @@ export function EnterpriseProvider({ children }: { children: ReactNode }) {
     return collection?.bookIds || [];
   }, [collections]);
 
+  // Department-level access filtering
+  const hasDepartmentAccessToCollection = useCallback((collectionId: string): boolean => {
+    if (!currentUser || !currentEnterprise) return false;
+    // Admins and compliance officers bypass department filtering
+    if (currentUser.role === 'admin' || currentUser.role === 'compliance_officer') return true;
+    if (currentUser.departmentIds.length === 0) return false;
+    const accessibleIds = getCollectionIdsForDepartments(currentUser.departmentIds);
+    return accessibleIds.includes(collectionId);
+  }, [currentUser, currentEnterprise]);
+
+  const getDepartmentAccessibleCollections = useCallback((): ComplianceCollection[] => {
+    if (!currentUser || !currentEnterprise) return [];
+    // Admins and compliance officers see everything
+    if (currentUser.role === 'admin' || currentUser.role === 'compliance_officer') return collections;
+    if (currentUser.departmentIds.length === 0) return [];
+    const accessibleIds = new Set(getCollectionIdsForDepartments(currentUser.departmentIds));
+    return collections.filter(c => accessibleIds.has(c.id));
+  }, [currentUser, currentEnterprise, collections]);
+
   const logAction = useCallback((
     action: AuditLogEntry['action'],
     targetType?: AuditLogEntry['targetType'],
@@ -263,6 +287,8 @@ export function EnterpriseProvider({ children }: { children: ReactNode }) {
     getEnterpriseDepartments,
     getEnterpriseBookAccess,
     getCollectionBooks,
+    getDepartmentAccessibleCollections,
+    hasDepartmentAccessToCollection,
     logAction,
     isAdmin,
     isComplianceOfficer,

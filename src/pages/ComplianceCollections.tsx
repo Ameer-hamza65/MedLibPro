@@ -27,7 +27,7 @@ const categoryColors: Record<ComplianceCollection['category'], string> = {
 
 export default function ComplianceCollections() {
   const navigate = useNavigate();
-  const { currentEnterprise, isEnterpriseMode, collections, getEnterpriseBookAccess, logAction, canAccessCollectionByTier, currentTier } = useEnterprise();
+  const { currentEnterprise, isEnterpriseMode, collections, getEnterpriseBookAccess, logAction, canAccessCollectionByTier, currentTier, getDepartmentAccessibleCollections, hasDepartmentAccessToCollection, currentUser, isAdmin, isComplianceOfficer } = useEnterprise();
   const { books } = useBooks();
 
   if (!isEnterpriseMode || !currentEnterprise) {
@@ -54,6 +54,7 @@ export default function ComplianceCollections() {
 
   const handleCollectionClick = (collection: ComplianceCollection) => {
     if (!canAccessCollectionByTier(collection.id)) return;
+    if (!hasDepartmentAccessToCollection(collection.id)) return;
     logAction('access_collection', 'collection', collection.id, collection.name);
     navigate(`/collections/${collection.id}`);
   };
@@ -126,6 +127,7 @@ export default function ComplianceCollections() {
             const accessStatus = getCollectionAccessStatus(collection);
             const collectionBooks = collection.bookIds.map(id => books.find(b => b.id === id)).filter(Boolean);
             const isTierLocked = !canAccessCollectionByTier(collection.id);
+            const isDeptLocked = !isTierLocked && !hasDepartmentAccessToCollection(collection.id);
 
             return (
               <motion.div
@@ -137,7 +139,7 @@ export default function ComplianceCollections() {
               >
                 <Card 
                   className={`group transition-shadow h-full glass-card ${
-                    isTierLocked 
+                    isTierLocked || isDeptLocked
                       ? 'opacity-70 border-dashed cursor-default' 
                       : 'hover:shadow-lg cursor-pointer'
                   }`}
@@ -145,8 +147,8 @@ export default function ComplianceCollections() {
                 >
                   <CardHeader>
                     <div className="flex items-start justify-between">
-                      <div className={`p-3 rounded-lg ${isTierLocked ? 'bg-muted' : 'bg-accent/10'}`}>
-                        {isTierLocked 
+                      <div className={`p-3 rounded-lg ${isTierLocked || isDeptLocked ? 'bg-muted' : 'bg-accent/10'}`}>
+                        {isTierLocked || isDeptLocked
                           ? <Lock className="h-6 w-6 text-muted-foreground" />
                           : <IconComponent className="h-6 w-6 text-accent" />
                         }
@@ -158,12 +160,18 @@ export default function ComplianceCollections() {
                             Pro Required
                           </Badge>
                         )}
+                        {isDeptLocked && (
+                          <Badge variant="outline" className="text-[10px]">
+                            <Lock className="h-2.5 w-2.5 mr-1" />
+                            Dept Restricted
+                          </Badge>
+                        )}
                         <Badge className={categoryColors[collection.category]}>
                           {collection.category.replace('_', ' ')}
                         </Badge>
                       </div>
                     </div>
-                    <CardTitle className={`text-lg mt-4 ${isTierLocked ? 'text-muted-foreground' : ''}`}>
+                    <CardTitle className={`text-lg mt-4 ${isTierLocked || isDeptLocked ? 'text-muted-foreground' : ''}`}>
                       {collection.name}
                     </CardTitle>
                     <CardDescription className="line-clamp-2">{collection.description}</CardDescription>
@@ -182,6 +190,16 @@ export default function ComplianceCollections() {
                         >
                           Upgrade to Access
                         </Button>
+                      </div>
+                    ) : isDeptLocked ? (
+                      <div className="space-y-4">
+                        <p className="text-sm text-muted-foreground">
+                          This collection is not assigned to your department. Contact your administrator for access.
+                        </p>
+                        <Badge variant="outline" className="text-xs">
+                          <Lock className="h-3 w-3 mr-1" />
+                          Department Access Required
+                        </Badge>
                       </div>
                     ) : (
                       <div className="space-y-4">

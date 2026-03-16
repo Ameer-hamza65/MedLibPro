@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { EpubBook } from '@/data/mockEpubData';
 import { useUser } from '@/context/UserContext';
 import { useEnterprise } from '@/context/EnterpriseContext';
+import { useUsageTracking } from '@/hooks/useUsageTracking';
 import { getBookCover } from '@/assets/covers';
 
 interface BookCardProps {
@@ -15,8 +16,18 @@ interface BookCardProps {
 export function BookCard({ book, onView }: BookCardProps) {
   const { hasFullAccess } = useUser();
   const { isEnterpriseMode } = useEnterprise();
+  const { trackUsageEvent } = useUsageTracking();
   const hasAccess = hasFullAccess(book.id);
   const coverImage = getBookCover(book.id);
+
+  const handleAccessDeniedClick = () => {
+    trackUsageEvent({
+      eventType: 'access_denied',
+      bookId: book.id,
+      bookTitle: book.title,
+      metadata: { reason: 'no_institutional_access' },
+    });
+  };
 
   return (
     <Card className="card-elevated overflow-hidden group h-full flex flex-col">
@@ -95,7 +106,7 @@ export function BookCard({ book, onView }: BookCardProps) {
           <Button 
             variant="outline" 
             className="w-full"
-            disabled
+            onClick={handleAccessDeniedClick}
           >
             <Building2 className="h-4 w-4 mr-1.5" />
             Institutional Access Required
